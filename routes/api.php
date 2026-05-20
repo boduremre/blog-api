@@ -33,11 +33,17 @@ Route::get('/test', function () {
     );
 });
 
-// Kategoriler
-Route::apiResource('/categories', CategoryController::class);
-
 // Korumalı Rotalar (Bearer Token Gerektirir)
 Route::middleware('auth:sanctum')->group(function () {
+
+    // Kategoriler
+    Route::apiResource('/categories', CategoryController::class)->missing(function (Request $request) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Kayıt bulunamadı!'
+        ], 404);
+    });
+
     // Tüm user işlemleri için tek satır yeterli (index, store, show, update, destroy)
     Route::apiResource('/users', UserController::class)->missing(function (Request $request) {
         return response()->json([
