@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 
 class Post extends Model
 {
@@ -16,7 +17,19 @@ class Post extends Model
         'content',
         'category_id',
         'user_id',
+        'status',
     ];
+
+    /**
+     * Scope a query to only include published posts.
+     */
+    public function scopePublished(Builder $query): Builder
+    {
+        return $query->where(
+            'status',
+            'published'
+        );
+    }
 
     /**
      * Get the comments for the post.
