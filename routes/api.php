@@ -1,10 +1,18 @@
 <?php
 
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\PostController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // php artisan make:controller Api/XController --api --model=X
+
+// Herkese Açık Rotalar
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout']);
+Route::post('/logout-all', [AuthController::class, 'logout_all']);
+Route::put('/update-password', [AuthController::class, 'update_password']);
 
 // API Test Route
 Route::get('/test', function () {
