@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\PostController;
+use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -34,18 +35,25 @@ Route::get('/test', function () {
     );
 });
 
+// Tüm user işlemleri için tek satır yeterli (index, store, show, update, destroy)
+Route::apiResource('/users', UserController::class)->missing(function (Request $request) {
+    return response()->json([
+        'success' => false,
+        'message' => 'Kayıt bulunamadı!'
+    ], 404);
+});
+
 Route::apiResource('posts', PostController::class)->missing(function (Request $request) {
     return response()->json([
         'success' => false,
         'message' => 'Kayıt bulunamadı!'
     ], 404);
-});;
+});
 
 // Korumalı Rotalar (Bearer Token Gerektirir)
 Route::middleware('auth:sanctum')->group(function () {
 
-    // Tüm user işlemleri için tek satır yeterli (index, store, show, update, destroy)
-    Route::apiResource('/users', UserController::class);
+
 
     // Şifre güncelleme rotası    
     Route::post('/update-password', [AuthController::class, 'update_password']);
