@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
@@ -11,9 +12,6 @@ use Illuminate\Support\Facades\Route;
 // Herkese Açık Rotalar
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout']);
-Route::post('/logout-all', [AuthController::class, 'logout_all']);
-Route::put('/update-password', [AuthController::class, 'update_password']);
 
 // API Test Route
 Route::get('/test', function () {
@@ -35,25 +33,25 @@ Route::get('/test', function () {
     );
 });
 
-// Tüm user işlemleri için tek satır yeterli (index, store, show, update, destroy)
-Route::apiResource('/users', UserController::class)->missing(function (Request $request) {
-    return response()->json([
-        'success' => false,
-        'message' => 'Kayıt bulunamadı!'
-    ], 404);
-});
-
-Route::apiResource('posts', PostController::class)->missing(function (Request $request) {
-    return response()->json([
-        'success' => false,
-        'message' => 'Kayıt bulunamadı!'
-    ], 404);
-});
+// Kategoriler
+Route::apiResource('/categories', CategoryController::class);
 
 // Korumalı Rotalar (Bearer Token Gerektirir)
 Route::middleware('auth:sanctum')->group(function () {
+    // Tüm user işlemleri için tek satır yeterli (index, store, show, update, destroy)
+    Route::apiResource('/users', UserController::class)->missing(function (Request $request) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Kayıt bulunamadı!'
+        ], 404);
+    });
 
-
+    Route::apiResource('posts', PostController::class)->missing(function (Request $request) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Kayıt bulunamadı!'
+        ], 404);
+    });
 
     // Şifre güncelleme rotası    
     Route::post('/update-password', [AuthController::class, 'update_password']);
