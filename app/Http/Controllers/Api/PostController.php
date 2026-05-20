@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use App\Models\Post;
-use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
@@ -23,14 +22,14 @@ class PostController extends Controller
      */
     public function store(StorePostRequest $request)
     {
-        $post = Post::create(
-            $request->validated()
-        );
+        // Create the post using validated data
+        $post = Post::create($request->validated());
 
+        // Load the category and user relationships for the response
         return response()->json([
             'success' => true,
             'message' => 'Post created successfully',
-            'data' => $post
+            'data' => $post->load('category:id,name', 'user:id,name,email')
         ], 201);
     }
 
@@ -48,6 +47,8 @@ class PostController extends Controller
      */
     public function update(UpdatePostRequest $request, Post $post)
     {
+        $this->authorize('update', $post);
+
         $post->update($request->validated());
         return response()->json([
             'success' => true,
@@ -61,6 +62,8 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
+        $this->authorize('delete', $post);
+
         $post->delete();
         return response()->json([
             'success' => true,
