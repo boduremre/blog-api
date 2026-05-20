@@ -41,6 +41,32 @@ Route::apiResource('posts', PostController::class)->missing(function (Request $r
     ], 404);
 });;
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+// Korumalı Rotalar (Bearer Token Gerektirir)
+Route::middleware('auth:sanctum')->group(function () {
+
+    // Tüm user işlemleri için tek satır yeterli (index, store, show, update, destroy)
+    Route::apiResource('/users', UserController::class);
+
+    // Şifre güncelleme rotası    
+    Route::post('/update-password', [AuthController::class, 'update_password']);
+
+    // Tek cihazdan çıkış yapma rotası
+    Route::post('/logout', [AuthController::class, 'logout']);
+
+    // Tüm cihazlardan çıkış yapma rotası
+    Route::post('/logout-all-devices', [AuthController::class, 'logout_all']);
+
+    // CSRF Token Göster
+    Route::get('/csrf-token', function (Request $request) {
+        return ['csrf_token' => $request->cookie('XSRF-TOKEN')];
+    });
+
+    // Kullanıcı bilgilerini döndüren rota
+    Route::get('/user', function (Request $request) {
+        return [
+            'bearer_token' => $request->bearerToken(),
+            'csrf_token' => $request->cookie('XSRF-TOKEN'),
+            'user' => $request->user()
+        ];
+    });
 });
