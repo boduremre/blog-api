@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\PostController;
+use App\Http\Controllers\Api\TagController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -35,6 +36,13 @@ Route::get('/test', function () {
 
 // Korumalı Rotalar (Bearer Token Gerektirir)
 Route::middleware('auth:sanctum')->group(function () {
+
+    Route::apiResource('/tags', TagController::class)->missing(function (Request $request) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Kayıt bulunamadı!'
+        ], 404);
+    });
 
     // Kategoriler
     Route::apiResource('/categories', CategoryController::class)->missing(function (Request $request) {
