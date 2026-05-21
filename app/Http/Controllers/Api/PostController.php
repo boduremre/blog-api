@@ -6,15 +6,18 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use App\Models\Post;
+use App\Services\PostService;
 
 class PostController extends Controller
 {
+    public function __construct(private readonly PostService $postService) {}
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return Post::with('category:id,name', 'user:id,name,email')->withCount('comments')->get();
+        return response()->json($this->postService->list());
     }
 
     /**
@@ -23,13 +26,13 @@ class PostController extends Controller
     public function store(StorePostRequest $request)
     {
         // Create the post using validated data
-        $post = Post::create($request->validated());
+        $post = $this->postService->create($request->validated(), $request->user());
 
         // Load the category and user relationships for the response
         return response()->json([
             'success' => true,
-            'message' => 'Post created successfully',
-            'data' => $post->load('category:id,name', 'user:id,name,email')
+            'message' => 'Post created successfully!',
+            'data' => $post
         ], 201);
     }
 
@@ -38,9 +41,10 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        // Eager load category and user relationships
-        return response()->json($post->load('category:id,name', 'user:id,name,email', 'comments.user:id,name'));
+        // Load the post with its relationships for the response
+        return response()->json($this->postService->find($post));
     }
+
 
     /**
      * Update the specified resource in storage.
@@ -49,11 +53,12 @@ class PostController extends Controller
     {
         $this->authorize('update', $post);
 
-        $post->update($request->validated());
+        $post = $this->postService->update($post, $request->validated());
+
         return response()->json([
             'success' => true,
-            'message' => 'Post updated successfully',
-            'data' => $post->load('category:id,name', 'user:id,name,email')
+            'message' => 'Post updated successfully!',
+            'data' => $post
         ]);
     }
 
@@ -64,7 +69,7 @@ class PostController extends Controller
     {
         $this->authorize('delete', $post);
 
-        $post->delete();
+        $this->postService->delete($post);
         return response()->json([
             'success' => true,
             'message' => 'Post deleted successfully'
